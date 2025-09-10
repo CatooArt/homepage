@@ -3,10 +3,10 @@ name: Deploy Pages
 on:
   push:
     branches:
-      - main        # deploy preview site
+      - main
     tags:
-      - '*'         # deploy stable release site
-  workflow_dispatch: # allow manual trigger
+      - '*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,22 +21,16 @@ jobs:
         with:
           node-version: 20
 
-      - name: Build site
-        run: |
-          echo "Building site from $GITHUB_REF"
-          # e.g. npm install && npm run build
+      - name: Install dependencies
+        run: npm install
 
-      - name: Organize output
-        run: |
-          if [[ "${GITHUB_REF}" == refs/heads/main ]]; then
-            mkdir -p public/preview
-            mv public/* public/preview/ || true
-          fi
+      - name: Build site
+        run: npx @11ty/eleventy   # This generates the static site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: ./_site   # Eleventy outputs here
 
   deploy:
     needs: build
